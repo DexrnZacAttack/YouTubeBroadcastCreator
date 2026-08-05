@@ -23,7 +23,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        id: ["win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm", "linux-arm64", "linux-musl-x64", "linux-musl-arm64", "linux-bionic-arm64", "linux-loongarch64", "osx"]
+        id: ["win-x64", "win-x86", "win-arm64", "linux-x64", "linux-arm", "linux-arm64", "linux-musl-x64", "linux-musl-arm64", "linux-bionic-arm64", "osx-x64", "osx-arm64"]
         type: ["Release", "Debug"]
 
     steps:
