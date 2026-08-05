@@ -33,7 +33,7 @@ jobs:
           
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.0'
+          dotnet-version: '10.0.x'
 
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
