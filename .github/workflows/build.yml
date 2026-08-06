@@ -86,19 +86,11 @@ jobs:
           pattern: YBCC_Release_*
           skip-decompress: true
           
-      - name: Zip it because download-artifact@v8 lies
+      - name: Move zips
         run: |
           mkdir -p ./zip
           
-          for item in ./artifacts/*; do
-            if [ -d "$item" ] || [ -f $item ]; then
-              I=$(basename "$item")
-          
-              echo "zipping $I"
-          
-              zip -r -j "./zip/$I.zip" "$item"
-            fi
-          done
+          find ./artifacts/ -mindepth 2 -maxdepth 2 -name "*.zip" -exec mv -t ./zip {} +
     
       - name: Create release
         if: ${{ inputs.create_release == true }}
