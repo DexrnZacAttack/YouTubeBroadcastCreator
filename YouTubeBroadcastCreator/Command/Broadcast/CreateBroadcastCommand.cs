@@ -1,4 +1,7 @@
+using System.Diagnostics;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using CliWrap.Buffered;
 using DotMake.CommandLine;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
@@ -7,11 +10,12 @@ using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using MimeDetective;
 using SmartFormat;
+using YouTubeBroadcastCreator.Util;
 
 namespace YouTubeBroadcastCreator.Command.Broadcast;
 
 [CliCommand(Name = "create", Description = "Automatically creates a broadcast with the given metadata and outputs the stream key and other metadata into the console.", Parent = typeof(BroadcastCommand), ShortFormAutoGenerate = CliNameAutoGenerate.Arguments | CliNameAutoGenerate.Directives | CliNameAutoGenerate.Options)]
-public class CreateBroadcastCommand
+public partial class CreateBroadcastCommand
 {
     [CliArgument(Name = "identifier", Description = "Unique ID for the channel you're using, used as an identifier to cache login details")]
     public required string Identifier { get; set; }
@@ -21,8 +25,11 @@ public class CreateBroadcastCommand
     
     [CliOption(Name = "metadata-file", Alias = "-m", Description = "Stream metadata JSON file path")]
     public FileInfo MetadataFile { get; set; } = new("metadata.json");
+    
+    [CliOption(Name = "evaluate-formatter-commands", Description = "Runs inline $cmd[] blocks as commands and outputs the result into the string for supported text fields. NOTE: Only enable if you're sure the text does not contain malicious commands.")]
+    public bool EvaluateFormatterCommands { get; set; } = false;
 
-    private static IContentInspector _contentInspector = new ContentInspectorBuilder()
+    private static readonly IContentInspector ContentInspector = new ContentInspectorBuilder()
     {
         Definitions = MimeDetective.Definitions.DefaultDefinitions.All()
     }.Build();
@@ -52,25 +59,17 @@ public class CreateBroadcastCommand
 
         return 0;
     }
-    
-    private static string FormatDefault(string s)
-    {
-        return Smart.Format(s, new
-        {
-            date = DateTime.Now//idk what else to add
-        });
-    }
 
-    private static async Task<BroadcastInfo> CreateBroadcastAsync(UserCredential creds, BroadcastMetadata meta)
+    private async Task<BroadcastInfo> CreateBroadcastAsync(UserCredential creds, BroadcastMetadata meta)
     {
+        string title = BroadcastTextFormatter.Format(meta.Title, EvaluateFormatterCommands);
+        string desc = BroadcastTextFormatter.Format(meta.Description, EvaluateFormatterCommands);
+        
         YouTubeService yt = new(new BaseClientService.Initializer()
         {
             HttpClientInitializer = creds,
             ApplicationName = Program.ProgramIdentifier
         });
-
-        string title = FormatDefault(meta.Title);
-        string desc = FormatDefault(meta.Description);
 
         LiveBroadcast broadcastPayload = new()
         {
@@ -120,7 +119,7 @@ public class CreateBroadcastCommand
         if (meta.ThumbnailFile != null)
         {
             await using FileStream fs = meta.ThumbnailFile.OpenRead();
-            var m = _contentInspector.Inspect(fs);
+            var m = ContentInspector.Inspect(fs);
             
             ThumbnailsResource.SetMediaUpload setRequest = yt.Thumbnails.Set(broadcastId, fs, m.ByMimeType().FirstOrDefault()?.MimeType ?? "application/octet-stream");
             await setRequest.UploadAsync();
