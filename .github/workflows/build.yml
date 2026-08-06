@@ -3,6 +3,13 @@
 name: Build YouTubeBroadcastCreator
 
 on:
+  workflow_dispatch: 
+    inputs: 
+      create_release:
+        description: "Create a release for this build?"
+        type: boolean
+        required: false
+        default: false
   push:
     branches: [ "master" ]
   pull_request:
@@ -56,3 +63,35 @@ jobs:
           name: YBCC_${{matrix.type}}_${{matrix.id}}
           path: |
             ${{steps.strings.outputs.build-output-dir}}
+      
+  release:
+    needs: build
+    if: ${{ inputs.create_release == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+    
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          pattern: YBCC_Release_.*
+    
+      - name: Create release
+        if: ${{ inputs.create_release == true }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(dotnet msbuild ${{github.workspace}}/YouTubeBroadcastCreator/YouTubeBroadcastCreator.csproj -getProperty:AssemblyVersion | xargs)
+          TAG=$(echo YouTubeBroadcastCreator/$VERSION)
+          
+          gh release create "$TAG" \
+            ./artifacts/* \
+            --title "YouTubeBroadcastCreator v$VERSION"
+            --generate-notes
