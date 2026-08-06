@@ -81,7 +81,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
-          pattern: YBCC_Release_.*
+          pattern: YBCC_Release_*
     
       - name: Create release
         if: ${{ inputs.create_release == true }}
