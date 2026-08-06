@@ -85,6 +85,20 @@ jobs:
           path: ./artifacts
           pattern: YBCC_Release_*
           skip-decompress: true
+          
+      - name: Zip it because download-artifact@v8 lies
+        run: |
+          mkdir -p ./zip
+          
+          for item in ./artifacts/*; do
+            if [ -d "$item" ] || [ -f $item ]; then
+              I=$(basename "$item")
+          
+              echo "zipping $I"
+          
+              zip -r -j "./zip/$I.zip" "$item"
+            fi
+          done
     
       - name: Create release
         if: ${{ inputs.create_release == true }}
@@ -95,6 +109,6 @@ jobs:
           TAG=$(echo YouTubeBroadcastCreator/$VERSION)
           
           gh release create "$TAG" \
-            ./artifacts/* \
+            ./zip/* \
             --title "YouTubeBroadcastCreator v$VERSION"
             --generate-notes
