@@ -34,13 +34,14 @@ jobs:
         type: ["Release", "Debug"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: 'recursive'
           
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
+          cache: true
 
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -58,7 +59,7 @@ jobs:
           -o ${{steps.strings.outputs.build-output-dir}}
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: YBCC_${{matrix.type}}_${{matrix.id}}
           path: |
@@ -71,19 +72,21 @@ jobs:
     permissions: 
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: 'recursive'
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
+          cache: true
     
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: ./artifacts
           pattern: YBCC_Release_*
+          skip-decompress: true
     
       - name: Create release
         if: ${{ inputs.create_release == true }}
