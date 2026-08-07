@@ -11,7 +11,8 @@ using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using MimeDetective;
 using SmartFormat;
-using YouTubeBroadcastCreator.API;
+using YouTubeBroadcastCreator.Core;
+using YouTubeBroadcastCreator.Core.API;
 using YouTubeBroadcastCreator.Util;
 
 namespace YouTubeBroadcastCreator.Command.Broadcast;
@@ -65,7 +66,7 @@ public partial class CreateBroadcastCommand
                                     [YouTubeService.Scope.Youtube],
                                     Identifier,
                                     CancellationToken.None,//TODo
-                                    new FileDataStore(Program.ProgramIdentifier)
+                                    new FileDataStore(Constants.ProgramIdentifier)
                                    );
         
         YouTubeAPIHelperService ytApi = new(creds);
@@ -84,7 +85,11 @@ public partial class CreateBroadcastCommand
         if (meta.ThumbnailFile != null)
         {
             await using FileStream fs = meta.ThumbnailFile.OpenRead();
-            await ytApi.SetThumbnail(broadcast, fs, ContentInspector);
+
+            var mime = ContentInspector.Inspect(fs);
+            fs.Position = 0;
+            
+            await ytApi.SetThumbnail(broadcast, fs, mime.ByMimeType().FirstOrDefault()?.MimeType ?? "application/octet-stream");
         }
 
         await ytApi.BindStreamAsync(stream, broadcast);

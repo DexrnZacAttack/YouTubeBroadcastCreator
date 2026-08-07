@@ -1,4 +1,5 @@
 using DotMake.CommandLine;
+using YouTubeBroadcastCreator.Core;
 
 namespace YouTubeBroadcastCreator.Command.Schema;
 

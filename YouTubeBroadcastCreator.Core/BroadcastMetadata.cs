@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Text.Json.Serialization;
-using YouTubeBroadcastCreator.Util.Serialization;
-using YouTubeBroadcastCreator.Util.Serialization.Schema;
+using YouTubeBroadcastCreator.Core.Util.Serialization;
+using YouTubeBroadcastCreator.Core.Util.Serialization.Schema;
 
-namespace YouTubeBroadcastCreator;
+namespace YouTubeBroadcastCreator.Core;
 
 public enum PrivacyStatus
 {

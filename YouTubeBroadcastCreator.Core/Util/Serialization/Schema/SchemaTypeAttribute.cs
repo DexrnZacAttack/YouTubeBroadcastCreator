@@ -1,4 +1,4 @@
-namespace YouTubeBroadcastCreator.Util.Serialization.Schema;
+namespace YouTubeBroadcastCreator.Core.Util.Serialization.Schema;
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct)]
 public class SchemaTypeAttribute(string types, bool removeProperties = true) : Attribute

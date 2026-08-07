@@ -5,8 +5,6 @@ namespace YouTubeBroadcastCreator;
 
 internal class Program
 {
-    public const string ProgramIdentifier = "me.dexrn.YouTubeBroadcastCreator";
-
     private static async Task<int> Main(string[] args)
     {
         CliSettings settings = new()

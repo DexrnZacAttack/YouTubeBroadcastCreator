@@ -2,17 +2,15 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
-using MimeDetective;
-using YouTubeBroadcastCreator.Util;
 
-namespace YouTubeBroadcastCreator.API;
+namespace YouTubeBroadcastCreator.Core.API;
 
 public class YouTubeAPIHelperService(UserCredential credentials)
 {
     private readonly YouTubeService _ytService = new(new BaseClientService.Initializer()
     {
         HttpClientInitializer = credentials,
-        ApplicationName = Program.ProgramIdentifier
+        ApplicationName = Constants.ProgramIdentifier
     });
     
     public async Task<LiveBroadcast> CreateBroadcastAsync(BroadcastMetadata meta)
@@ -122,15 +120,12 @@ public class YouTubeAPIHelperService(UserCredential credentials)
         return null;
     }
 
-    public async Task SetThumbnail(LiveBroadcast broadcast, FileStream fs, IContentInspector inspector) =>
-        await SetThumbnail(broadcast.Id, fs, inspector);
+    public async Task SetThumbnail(LiveBroadcast broadcast, FileStream fs, string type) =>
+        await SetThumbnail(broadcast.Id, fs, type);
     
-    public async Task SetThumbnail(string broadcastId, FileStream fs, IContentInspector inspector)
+    public async Task SetThumbnail(string broadcastId, FileStream fs, string type)
     {
-        var m = inspector.Inspect(fs);
-        fs.Position = 0;
-        
-        ThumbnailsResource.SetMediaUpload setRequest = _ytService.Thumbnails.Set(broadcastId, fs, m.ByMimeType().FirstOrDefault()?.MimeType ?? "application/octet-stream");
+        ThumbnailsResource.SetMediaUpload setRequest = _ytService.Thumbnails.Set(broadcastId, fs, type);
         await setRequest.UploadAsync();
     }
 

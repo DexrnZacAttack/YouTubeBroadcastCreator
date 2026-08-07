@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTubeBroadcastCreator", "YouTubeBroadcastCreator\YouTubeBroadcastCreator.csproj", "{47560AFE-19D2-4EF1-BD64-864049F71A46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTubeBroadcastCreator.Core", "YouTubeBroadcastCreator.Core\YouTubeBroadcastCreator.Core.csproj", "{7275C56F-6349-4FF6-ABEA-C66E210779E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{47560AFE-19D2-4EF1-BD64-864049F71A46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47560AFE-19D2-4EF1-BD64-864049F71A46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47560AFE-19D2-4EF1-BD64-864049F71A46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7275C56F-6349-4FF6-ABEA-C66E210779E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7275C56F-6349-4FF6-ABEA-C66E210779E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7275C56F-6349-4FF6-ABEA-C66E210779E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7275C56F-6349-4FF6-ABEA-C66E210779E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
