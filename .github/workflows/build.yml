@@ -6,7 +6,7 @@ on:
   workflow_dispatch: 
     inputs: 
       create_release:
-        description: "Create a release for this build?"
+        description: "Create release"
         type: boolean
         required: false
         default: false

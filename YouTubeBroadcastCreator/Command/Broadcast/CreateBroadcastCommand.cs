@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using CliWrap.Buffered;
@@ -10,6 +11,7 @@ using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using MimeDetective;
 using SmartFormat;
+using YouTubeBroadcastCreator.API;
 using YouTubeBroadcastCreator.Util;
 
 namespace YouTubeBroadcastCreator.Command.Broadcast;
@@ -29,6 +31,9 @@ public partial class CreateBroadcastCommand
     [CliOption(Name = "evaluate-formatter-commands", Description = "Runs inline $cmd[] blocks as commands and outputs the result into the string for supported text fields. NOTE: Only enable if you're sure the text does not contain malicious commands.")]
     public bool EvaluateFormatterCommands { get; set; } = false;
 
+    [CliOption(Name = "existing-stream-key-name", Description = "Rebinds the given stream key (by name) to the new broadcast", Required = false)]
+    public string? ExistingStreamKeyName { get; set; } = null;
+
     private static readonly IContentInspector ContentInspector = new ContentInspectorBuilder()
     {
         Definitions = MimeDetective.Definitions.DefaultDefinitions.All()
@@ -39,6 +44,15 @@ public partial class CreateBroadcastCommand
         await using FileStream mfs = MetadataFile.OpenRead();
         BroadcastMetadata meta = await JsonSerializer.DeserializeAsync<BroadcastMetadata>(mfs) ??
                                  throw new InvalidOperationException("Broadcast meta is null");
+        
+        string title = BroadcastTextFormatter.Format(meta.Title, EvaluateFormatterCommands);
+        string desc = BroadcastTextFormatter.Format(meta.Description, EvaluateFormatterCommands);
+
+        meta = meta with
+        {
+            Title = title,
+            Description = desc
+        };
 
         if (string.IsNullOrWhiteSpace(meta.Title))
         {
@@ -53,104 +67,28 @@ public partial class CreateBroadcastCommand
                                     CancellationToken.None,//TODo
                                     new FileDataStore(Program.ProgramIdentifier)
                                    );
+        
+        YouTubeAPIHelperService ytApi = new(creds);
 
-        BroadcastInfo bc = await CreateBroadcastAsync(creds, meta);
+        BroadcastInfo bc = await PublishNewBroadcastAsync(ytApi, meta);
         Console.WriteLine(JsonSerializer.Serialize(bc));//todo can I find alternative way of doing this???
 
         return 0;
     }
 
-    private async Task<BroadcastInfo> CreateBroadcastAsync(UserCredential creds, BroadcastMetadata meta)
+    private async Task<BroadcastInfo> PublishNewBroadcastAsync(YouTubeAPIHelperService ytApi, BroadcastMetadata meta)
     {
-        string title = BroadcastTextFormatter.Format(meta.Title, EvaluateFormatterCommands);
-        string desc = BroadcastTextFormatter.Format(meta.Description, EvaluateFormatterCommands);
+        LiveStream stream = await ytApi.GetOrCreateStreamAsync(ExistingStreamKeyName, meta);
+        LiveBroadcast broadcast = await ytApi.CreateBroadcastAsync(meta);
         
-        YouTubeService yt = new(new BaseClientService.Initializer()
-        {
-            HttpClientInitializer = creds,
-            ApplicationName = Program.ProgramIdentifier
-        });
-
-        LiveBroadcast broadcastPayload = new()
-        {
-            Status = new LiveBroadcastStatus
-            {
-                PrivacyStatus = meta.PrivacyStatus.ToString().ToLowerInvariant(),
-                SelfDeclaredMadeForKids = meta.MadeForKids
-            },
-            ContentDetails = new LiveBroadcastContentDetails
-            {
-                EnableAutoStart = meta.Settings.UseAutoStart,
-                EnableAutoStop = meta.Settings.UseAutoStop,
-                EnableDvr = meta.Settings.UseDvr,
-                RecordFromStart = meta.Settings.RecordFromStart,
-                EnableEmbed = meta.Settings.AllowEmbedding,
-                LatencyPreference = meta.Settings.StreamLatency switch
-                {
-                    StreamLatency.Normal   => "normal",
-                    StreamLatency.Low      => "low",
-                    StreamLatency.UltraLow => "ultraLow",
-                    _                      => throw new InvalidOperationException("Invalid latency value")
-                },
-                EnableLowLatency = meta.Settings.StreamLatency switch
-                {
-                    StreamLatency.Normal   => false,
-                    StreamLatency.Low      => true,
-                    StreamLatency.UltraLow => null,
-                    _                      => throw new InvalidOperationException("Invalid latency value")
-                }
-            },
-            Snippet = new LiveBroadcastSnippet
-            {
-                Title = title,
-                Description = desc,
-                ScheduledStartTimeDateTimeOffset = meta.Schedule?.StartTime ?? DateTimeOffset.UtcNow,
-                ScheduledEndTimeDateTimeOffset = meta.Schedule?.EndTime,
-            }
-        };
-
-        LiveBroadcastsResource.InsertRequest insertRequest =
-            yt.LiveBroadcasts.Insert(broadcastPayload, "snippet,status,contentDetails");
-        LiveBroadcast broadcast = await insertRequest.ExecuteAsync();
-
-        //note: video id
-        string broadcastId = broadcast.Id;
-
         if (meta.ThumbnailFile != null)
         {
             await using FileStream fs = meta.ThumbnailFile.OpenRead();
-            var m = ContentInspector.Inspect(fs);
-            
-            ThumbnailsResource.SetMediaUpload setRequest = yt.Thumbnails.Set(broadcastId, fs, m.ByMimeType().FirstOrDefault()?.MimeType ?? "application/octet-stream");
-            await setRequest.UploadAsync();
+            await ytApi.SetThumbnail(broadcast, fs, ContentInspector);
         }
-        
-        LiveStream streamPayload = new()
-        {
-            Snippet = new LiveStreamSnippet
-            {
-                Title = $"(YouTubeBroadcastCreator) {title}"
-            },
-            Cdn = new CdnSettings
-            {
-                Resolution = meta.ContentDeliverySettings.Resolution,
-                FrameRate = meta.ContentDeliverySettings.FrameRate,
-                IngestionType = meta.ContentDeliverySettings.IngestionType.ToString().ToLowerInvariant()
-            }
-        };
 
-        LiveStreamsResource.InsertRequest streamRequest = yt.LiveStreams.Insert(streamPayload, "snippet,cdn");
-        LiveStream stream = await streamRequest.ExecuteAsync();
+        await ytApi.BindStreamAsync(stream, broadcast);
 
-        string streamId = stream.Id;
-        string streamKey = stream.Cdn.IngestionInfo.StreamName;
-        string streamAddr = stream.Cdn.IngestionInfo.IngestionAddress;
-
-        LiveBroadcastsResource.BindRequest bindRequest = yt.LiveBroadcasts.Bind(broadcastId, "id,contentDetails");
-        bindRequest.StreamId = streamId;
-
-        await bindRequest.ExecuteAsync();
-
-        return new BroadcastInfo(broadcastId, streamKey, streamAddr);
+        return new BroadcastInfo(broadcast.Id, stream.Cdn.IngestionInfo.StreamName, stream.Cdn.IngestionInfo.IngestionAddress);
     }
 }
