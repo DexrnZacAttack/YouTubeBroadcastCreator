@@ -102,5 +102,4 @@ jobs:
           
           gh release create "$TAG" \
             ./zip/* \
-            --title "YouTubeBroadcastCreator v$VERSION" \
-            --generate-notes
+            --title "YouTubeBroadcastCreator v$VERSION"

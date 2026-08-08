@@ -1,5 +1,18 @@
-# YouTubeBroadcastCreator
+<h1>YouTubeBroadcastCreator</h1>
+<a href="https://github.com/DexrnZacAttack/YouTubeBroadcastCreator/wiki">
+    <img alt="ghpages" height="40" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/documentation/ghpages_vector.svg">
+</a>
+
+<hr>
+
 Used for automatically creating a ready-to-stream YouTube broadcast, printing the stream key for easy automation.
+
+> [!NOTE]
+> The scope for this project will be increasing sometime Soon™ to include CLI individual stream and broadcast creation, modification, and deletion
+>
+> As such, I am looking for a new name for this project, as it has outgrown the purpose of just creating broadcasts.
+>
+> If you can suggest a name that gets picked, I will also credit you in this very readme if desired.
 
 > [!IMPORTANT]
 > I cannot guarantee Google will be very happy with it.

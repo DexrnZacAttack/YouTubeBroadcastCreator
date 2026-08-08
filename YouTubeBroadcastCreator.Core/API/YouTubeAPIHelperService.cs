@@ -2,10 +2,13 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
+using YouTubeBroadcastCreator.Core.API.Extensions;
+using YouTubeBroadcastCreator.Core.Types.Broadcast;
+using YouTubeBroadcastCreator.Core.Types.Stream;
 
 namespace YouTubeBroadcastCreator.Core.API;
 
-public class YouTubeAPIHelperService(UserCredential credentials)
+public class YouTubeApiHelperService(UserCredential credentials)
 {
     private readonly YouTubeService _ytService = new(new BaseClientService.Initializer()
     {
@@ -15,68 +18,29 @@ public class YouTubeAPIHelperService(UserCredential credentials)
     
     public async Task<LiveBroadcast> CreateBroadcastAsync(BroadcastMetadata meta)
     {
-        LiveBroadcast broadcastPayload = new()
-        {
-            Status = new LiveBroadcastStatus
-            {
-                PrivacyStatus = meta.PrivacyStatus.ToString().ToLowerInvariant(),
-                SelfDeclaredMadeForKids = meta.MadeForKids
-            },
-            ContentDetails = new LiveBroadcastContentDetails
-            {
-                EnableAutoStart = meta.Settings.UseAutoStart,
-                EnableAutoStop = meta.Settings.UseAutoStop,
-                EnableDvr = meta.Settings.UseDvr,
-                RecordFromStart = meta.Settings.RecordFromStart,
-                EnableEmbed = meta.Settings.AllowEmbedding,
-                LatencyPreference = meta.Settings.StreamLatency switch
-                {
-                    StreamLatency.Normal   => "normal",
-                    StreamLatency.Low      => "low",
-                    StreamLatency.UltraLow => "ultraLow",
-                    _                      => throw new InvalidOperationException("Invalid latency value")
-                },
-                EnableLowLatency = meta.Settings.StreamLatency switch
-                {
-                    StreamLatency.Normal   => false,
-                    StreamLatency.Low      => true,
-                    StreamLatency.UltraLow => null,
-                    _                      => throw new InvalidOperationException("Invalid latency value")
-                }
-            },
-            Snippet = new LiveBroadcastSnippet
-            {
-                Title = meta.Title,
-                Description = meta.Description,
-                ScheduledStartTimeDateTimeOffset = meta.Schedule?.StartTime ?? DateTimeOffset.UtcNow,
-                ScheduledEndTimeDateTimeOffset = meta.Schedule?.EndTime,
-            }
-        };
+        LiveBroadcast broadcastPayload = LiveBroadcast.FromBroadcastMetadata(meta);
 
         LiveBroadcastsResource.InsertRequest insertRequest =
             _ytService.LiveBroadcasts.Insert(broadcastPayload, "snippet,status,contentDetails");
         return await insertRequest.ExecuteAsync();
     }
 
-    public async Task<LiveStream> GetOrCreateStreamAsync(string? existingStreamTitle, BroadcastMetadata meta)
+    public async Task<LiveStream> GetOrCreateStreamAsync(StreamMetadata meta)
     {
-        if (!string.IsNullOrWhiteSpace(existingStreamTitle))
-        {
-            LiveStream? strm = await GetExistingReusableStreamAsync(existingStreamTitle);
-            if (strm != null) return strm;
-        }
+        LiveStream? strm = await GetExistingReusableStreamAsync(meta.Title);
+        if (strm != null) return strm;
         
         return await CreateStreamAsync(meta);
     }
     
-    public async Task<LiveStream> CreateStreamAsync(BroadcastMetadata meta)
+    public async Task<LiveStream> CreateStreamAsync(StreamMetadata meta)
     {
         LiveStream streamPayload = new()
         {
             Snippet = new LiveStreamSnippet
             {
-                Title = $"(YouTubeBroadcastCreator:{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}) {meta.Title}",
-                Description = $"Created by YouTubeBroadcastCreator on {DateTime.Now:F}"
+                Title = meta.Title,
+                Description = meta.Description
             },
             Cdn = new CdnSettings
             {

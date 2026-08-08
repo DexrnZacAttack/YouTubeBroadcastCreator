@@ -11,6 +11,11 @@ namespace YouTubeBroadcastCreator.Core;
 public class Constants
 {
     public const string ProgramIdentifier = "me.dexrn.YouTubeBroadcastCreator";
+
+    public static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    {
+        WriteIndented = true
+    };
     
     //derived from https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/extract-schema
     public static readonly JsonSchemaExporterOptions JsonSchemaExporterOptions = new()

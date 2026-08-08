@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace YouTubeBroadcastCreator;
+namespace YouTubeBroadcastCreator.Types;
 
 public record BroadcastInfo(
     [property: JsonPropertyName("video_id")] string BroadcastId,

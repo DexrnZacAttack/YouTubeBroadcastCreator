@@ -1,12 +1,7 @@
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
 using DotMake.CommandLine;
 using YouTubeBroadcastCreator.Core;
-using YouTubeBroadcastCreator.Core.Util.Serialization.Schema;
 
 namespace YouTubeBroadcastCreator.Command.Schema;
 
