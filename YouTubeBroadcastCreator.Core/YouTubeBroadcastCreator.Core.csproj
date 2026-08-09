@@ -5,12 +5,13 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Company>DexrnZacAttack</Company>
-        <AssemblyVersion>1.1.0</AssemblyVersion>
-        <FileVersion>1.1.0</FileVersion>
+        <AssemblyVersion>1.2.0</AssemblyVersion>
+        <FileVersion>1.2.0</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Google.Apis.YouTube.v3" Version="1.75.0.4207" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
     </ItemGroup>
 
 </Project>

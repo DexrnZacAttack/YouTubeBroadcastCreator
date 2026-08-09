@@ -7,7 +7,7 @@ namespace YouTubeBroadcastCreator.Core.Types.Stream;
 public record StreamMetadata
 {
     [JsonPropertyName("title"), Description("The stream title, must not be empty.")]
-    public string Title { get; init; } = @"YouTubeBroadcastCreator - {date:yyyy-MM-dd HH\:mm\:ss}";
+    public string Title { get; init; } = $@"{Constants.ProgramName} - {{date:yyyy-MM-dd HH\:mm\:ss}}";
 
     [JsonPropertyName("description"), Description("The stream description"), JsonRequired]
     public string Description { get; init; } = string.Empty;

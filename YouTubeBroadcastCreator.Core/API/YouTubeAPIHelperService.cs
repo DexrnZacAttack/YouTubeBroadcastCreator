@@ -5,16 +5,19 @@ using Google.Apis.YouTube.v3.Data;
 using YouTubeBroadcastCreator.Core.API.Extensions;
 using YouTubeBroadcastCreator.Core.Types.Broadcast;
 using YouTubeBroadcastCreator.Core.Types.Stream;
+using Microsoft.Extensions.Logging;
 
 namespace YouTubeBroadcastCreator.Core.API;
 
-public class YouTubeApiHelperService(UserCredential credentials)
+public class YouTubeApiHelperService(UserCredential credentials, ILogger<YouTubeApiHelperService> logger)
 {
     private readonly YouTubeService _ytService = new(new BaseClientService.Initializer()
     {
         HttpClientInitializer = credentials,
         ApplicationName = Constants.ProgramIdentifier
     });
+
+    private readonly ILogger<YouTubeApiHelperService> _logger = logger;
     
     public async Task<LiveBroadcast> CreateBroadcastAsync(BroadcastMetadata meta)
     {
@@ -68,11 +71,11 @@ public class YouTubeApiHelperService(UserCredential credentials)
             
             if (strm.Status?.HealthStatus?.ConfigurationIssues?.Any() ?? false)
             {
-                await Console.Error.WriteLineAsync("There are configuration issues with the provided existing live stream:");
+                _logger.LogError("There are configuration issues with the provided existing live stream:");
                 foreach (LiveStreamConfigurationIssue configIssue in strm.Status.HealthStatus.ConfigurationIssues)
                 {
-                    await Console.Error.WriteLineAsync($"   - {configIssue.Reason}");
-                    await Console.Error.WriteLineAsync($"     {configIssue.Description}");
+                    _logger.LogError("   - {Reason}", configIssue.Reason);
+                    _logger.LogError("     {Description}", configIssue.Description);
                 }
 
                 return null;

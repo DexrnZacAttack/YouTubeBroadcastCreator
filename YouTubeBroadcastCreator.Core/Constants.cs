@@ -10,7 +10,8 @@ namespace YouTubeBroadcastCreator.Core;
 
 public class Constants
 {
-    public const string ProgramIdentifier = "me.dexrn.YouTubeBroadcastCreator";
+    public const string ProgramIdentifier = $"me.dexrn.{ProgramName}";
+    public const string ProgramName = "YouTubeBroadcastCreator";
 
     public static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {

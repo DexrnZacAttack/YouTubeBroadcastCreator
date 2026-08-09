@@ -1,6 +1,4 @@
 using DotMake.CommandLine;
-using YouTubeBroadcastCreator.Core;
-using YouTubeBroadcastCreator.Core.Types.Broadcast;
 using YouTubeBroadcastCreator.Types;
 
 namespace YouTubeBroadcastCreator.Command.Schema;

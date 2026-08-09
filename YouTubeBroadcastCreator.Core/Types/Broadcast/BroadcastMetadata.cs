@@ -12,12 +12,12 @@ public record BroadcastMetadata
     [JsonPropertyName("title")]
     [Description("The broadcast title, must not be empty.")]
     [JsonRequired]
-    public string Title { get; init; } = "YouTubeBroadcastCreator Template Broadcast Title";
+    public string Title { get; init; } = $"{Constants.ProgramName} Template Broadcast Title";
 
     [JsonPropertyName("description")]
     [Description("The broadcast description")]
     [JsonRequired]
-    public string Description { get; init; } = "Created using YouTubeBroadcastCreator";
+    public string Description { get; init; } = $"Created using {Constants.ProgramName}";
 
     [JsonPropertyName("thumbnail_path")]
     [Description("Path to a thumbnail file if desired")]

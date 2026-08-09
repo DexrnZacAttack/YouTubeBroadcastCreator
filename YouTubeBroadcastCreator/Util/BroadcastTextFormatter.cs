@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using CliWrap.Buffered;
+using Serilog;
 using SmartFormat;
 
 namespace YouTubeBroadcastCreator.Util;
@@ -37,7 +38,7 @@ public static partial class BroadcastTextFormatter
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Failed to format command '{string.Join(' ', cmdline)}'! {ex.Message}");
+                Log.Error("Failed to format command '{Command}'! {Message}", string.Join(' ', cmdline), ex.Message);
                 return "YBCC_CMD_EVAL_FAIL";
             }
         }).Replace($"{CmdEscape}{CmdStart}", CmdStart);

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using DotMake.CommandLine;
+using Serilog;
 using YouTubeBroadcastCreator.Core;
 using YouTubeBroadcastCreator.Types;
 
@@ -17,6 +18,7 @@ public class CreateProfileTemplateCommand : ICliRunAsyncWithReturn
         await using FileStream fs = ProfileFile.Open(FileMode.Create, FileAccess.Write);
 
         await JsonSerializer.SerializeAsync(fs, profile, Constants.JsonSerializerOptions);
+        Log.Information("Profile template has been written to '{Path}'", ProfileFile.FullName);
 
         return 0;
     }
