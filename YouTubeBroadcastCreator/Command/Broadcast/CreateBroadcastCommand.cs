@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -47,6 +48,11 @@ public partial class CreateBroadcastCommand(ILoggerFactory loggerFactory) : IAut
                Description =
                    "Runs inline $cmd[] blocks as commands and outputs the result into the string for supported text fields. NOTE: Only enable if you're sure the text does not contain malicious commands.")]
     public bool EvaluateFormatterCommands { get; set; } = false;
+    
+    [CliOption(Name = "output", Alias = "o",
+               Description =
+                   "Outputs to a file with the given path", Required = false)]
+    public FileInfo? OutputFile { get; set; }
 
     private static readonly IContentInspector ContentInspector = new ContentInspectorBuilder()
     {
@@ -55,6 +61,12 @@ public partial class CreateBroadcastCommand(ILoggerFactory loggerFactory) : IAut
 
     public async Task<int> RunAsync()
     {
+        if (OutputFile != null && !(OutputFile.Directory?.Exists ?? false))
+        {
+            throw new
+                DirectoryNotFoundException($"Directory for output file not found. Chosen file path: '{OutputFile.FullName}'");
+        }
+        
         await using FileStream mfs = ProfileFile.OpenRead();
         LiveStreamBroadcastProfile profile = await JsonSerializer.DeserializeAsync<LiveStreamBroadcastProfile>(mfs) ??
                                              throw new InvalidOperationException("Broadcast meta is null");
@@ -106,8 +118,18 @@ public partial class CreateBroadcastCommand(ILoggerFactory loggerFactory) : IAut
         BroadcastInfo bc = await PublishNewBroadcastAsync(ytApi, profile);
         
         Log.Information("Broadcast '{Name}' has been published.\nVideo link: https://youtu.be/{Id}\nBroadcast info:", profile.BroadcastMetadata.Title, bc.BroadcastId);
-        Console.WriteLine(JsonSerializer.Serialize(bc)); //todo can I find alternative way of doing this???
+        string serialized = JsonSerializer.Serialize(bc);
+        Console.WriteLine(serialized); //todo can I find alternative way of doing this???
 
+        if (OutputFile != null)
+        {
+            Log.Information("Writing to file {Path}", OutputFile.FullName);
+            await using FileStream o = OutputFile.Open(FileMode.Create, FileAccess.Write);
+            await using StreamWriter sw = new(o);
+        
+            await sw.WriteAsync(serialized);
+        }
+        
         return 0;
     }
 
