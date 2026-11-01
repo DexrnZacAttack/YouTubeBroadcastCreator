@@ -24,6 +24,14 @@ A good example would be running a 24/7 live stream, if you ever wanted to restar
 
 You can pipe the output into say the OBS Advanced Scene Switcher plugin and automatically set the stream key before starting your stream.
 
+## Setup
+- Install .NET 10
+- Download the latest release for your OS and architecture from [GitHub Releases](https://github.com/DexrnZacAttack/YouTubeBroadcastCreator/releases)
+- Extract the ZIP file
+- Open a terminal in the same folder as YouTubeBroadcastCreator(.exe) previously found within the zip file
+- You may now run YouTubeBroadcastCreator(.exe) to view help.
+[Read the docs](https://github.com/DexrnZacAttack/YouTubeBroadcastCreator/wiki) for more info on how to use the project.
+
 ### Disclaimer
 I am NOT affiliated with YouTube, Google, or any other entities involved.
 
