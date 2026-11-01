@@ -8,7 +8,7 @@
 <table>
   <tr>
     <td align="center" width="33%">
-      <img src="./repo_assets/sd-ybcc-main-showcase-hevc.mp4" alt="Showcase video of the YBCC creating a livestream" width="100%">
+      <video src="repo_assets/sd-ybcc-main-showcase-hevc.mp4" alt="Showcase video of the YBCC creating a livestream" width="100%"></video>
       <br>
       <b>Showcase video of the YBCC creating a livestream</b>
     </td>
