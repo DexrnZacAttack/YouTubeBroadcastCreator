@@ -8,7 +8,7 @@
 <table>
   <tr>
     <td align="center" width="33%">
-      <video src="https://git.dexrn.me/Dexrn/YouTubeBroadcastCreator/raw/branch/master/repo_assets/sd-ybcc-main-showcase-hevc.mp4" alt="Showcase video of the YBCC creating a livestream" width="50%" controls></video>
+      <video src="https://github.com/user-attachments/assets/52ba34bc-86b8-4a7c-b78f-a816d96ca34c" alt="Showcase video of the YBCC creating a livestream" width="50%" controls></video>
       <br>
       <b>Showcase video of the YBCC creating a livestream</b>
     </td>
