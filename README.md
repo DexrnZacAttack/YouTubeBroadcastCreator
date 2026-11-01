@@ -5,6 +5,16 @@
 
 <hr>
 
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="./repo_assets/sd-ybcc-main-showcase-hevc.mp4" alt="Showcase video of the YBCC creating a livestream" width="100%">
+      <br>
+      <b>Showcase video of the YBCC creating a livestream</b>
+    </td>
+  </tr>
+</table>
+
 Used for automatically creating a ready-to-stream YouTube broadcast, printing the stream key for easy automation.
 
 > [!NOTE]
